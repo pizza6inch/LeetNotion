@@ -25,6 +25,6 @@
   "dependencies": {
     "@notionhq/client": "^2.2.16",
     "axios": "^1.7.9",
-    "dotenv": "^16.4.7",
+    "dotenv": "^16.4.7"
   }
 }
