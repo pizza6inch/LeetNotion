@@ -1,6 +1,5 @@
 const axios = require("axios");
 const { Client } = require("@notionhq/client");
-const parseHtmlToNotionBlocks = require("html-to-notion");
 
 import { resolve } from "path";
 import { config } from "dotenv";
@@ -159,8 +158,8 @@ async function fetchNotionUsers() {
 
 const fetchDailyProblem = async () => {
   try {
-    // const response = await axios.get("https://alfa-leetcode-api.onrender.com/daily");
-    const response = await axios.get("http://localhost:3000/daily");
+    const response = await axios.get("https://alfa-leetcode-api.onrender.com/daily");
+    // const response = await axios.get("http://localhost:3000/daily");
     const problem = response.data as Problem;
     return problem;
   } catch (error) {
@@ -171,15 +170,6 @@ const fetchDailyProblem = async () => {
 const main = async () => {
   const problem = await fetchDailyProblem();
 
-  // const text = parseHtmlToNotionBlocks.default(problem?.question);
-
-  // const richText = text.map((item: { paragraph: { text: string[] | undefined; rich_text: string[] | undefined } }) => {
-  //   item.paragraph.rich_text = item.paragraph.text;
-  //   item.paragraph.text = undefined;
-  //   return item;
-  // });
-
-  // console.log(JSON.stringify(richText));
   const users = await fetchNotionUsers();
   if (problem && users) createNotionPage(problem, users);
 };
