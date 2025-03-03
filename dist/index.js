@@ -7,7 +7,52 @@ const path_1 = require("path");
 const dotenv_1 = require("dotenv");
 (0, dotenv_1.config)({ path: (0, path_1.resolve)(__dirname, "../.env") });
 const notion = new Client({ auth: process.env.NOTION_KEY });
-async function createNotionPage(problem) {
+async function createNotionPage(problem, users) {
+    const usersContent = users.flatMap((user) => [
+        {
+            object: "block",
+            type: "heading_2",
+            heading_2: {
+                rich_text: [
+                    {
+                        type: "text",
+                        text: {
+                            content: `${user.name}的解法：`,
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            object: "block",
+            type: "code",
+            code: {
+                language: "c++",
+                rich_text: [
+                    {
+                        type: "text",
+                        text: {
+                            content: "put your code here",
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            object: "block",
+            type: "paragraph",
+            paragraph: {
+                rich_text: [
+                    {
+                        type: "text",
+                        text: {
+                            content: "筆記：",
+                        },
+                    },
+                ],
+            },
+        },
+    ]);
     const data = {
         parent: {
             type: "database_id",
@@ -71,12 +116,13 @@ async function createNotionPage(problem) {
                         {
                             type: "text",
                             text: {
-                                content: "hello world",
+                                content: `NO.${problem.questionFrontendId} ${problem.difficulty}`,
                             },
                         },
                     ],
                 },
             },
+            ...usersContent,
         ],
     };
     const result = await notion.pages.create(data);
@@ -84,7 +130,8 @@ async function createNotionPage(problem) {
 }
 async function fetchNotionUsers() {
     const response = await notion.users.list();
-    console.log(response);
+    const results = response.results;
+    return results.filter((user) => user.type === "person");
 }
 const fetchDailyProblem = async () => {
     try {
@@ -106,7 +153,8 @@ const main = async () => {
     //   return item;
     // });
     // console.log(JSON.stringify(richText));
-    fetchNotionUsers();
-    // if (problem) createNotionPage(problem);
+    const users = await fetchNotionUsers();
+    if (problem && users)
+        createNotionPage(problem, users);
 };
 main();

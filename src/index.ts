@@ -19,14 +19,60 @@ type Problem = {
   exampleTestcases: string;
 };
 
-type Users = {
+type Users = Array<{
   id: string;
   name: string;
   type: string;
   avatar_url: string;
-};
+}>;
 
-async function createNotionPage(problem: Problem) {
+async function createNotionPage(problem: Problem, users: Users) {
+  const usersContent = users.flatMap((user) => [
+    {
+      object: "block",
+      type: "heading_2",
+      heading_2: {
+        rich_text: [
+          {
+            type: "text",
+            text: {
+              content: `${user.name}的解法：`,
+            },
+          },
+        ],
+      },
+    },
+    {
+      object: "block",
+      type: "code",
+      code: {
+        language: "c++",
+        rich_text: [
+          {
+            type: "text",
+            text: {
+              content: "put your code here",
+            },
+          },
+        ],
+      },
+    },
+    {
+      object: "block",
+      type: "paragraph",
+      paragraph: {
+        rich_text: [
+          {
+            type: "text",
+            text: {
+              content: "筆記：",
+            },
+          },
+        ],
+      },
+    },
+  ]);
+
   const data = {
     parent: {
       type: "database_id",
@@ -90,12 +136,13 @@ async function createNotionPage(problem: Problem) {
             {
               type: "text",
               text: {
-                content: "hello world",
+                content: `NO.${problem.questionFrontendId} ${problem.difficulty}`,
               },
             },
           ],
         },
       },
+      ...usersContent,
     ],
   };
 
@@ -105,8 +152,9 @@ async function createNotionPage(problem: Problem) {
 
 async function fetchNotionUsers() {
   const response = await notion.users.list();
-  const results = response.results;
-  return results;
+  const results: Users = response.results;
+
+  return results.filter((user) => user.type === "person");
 }
 
 const fetchDailyProblem = async () => {
@@ -132,8 +180,8 @@ const main = async () => {
   // });
 
   // console.log(JSON.stringify(richText));
-  const users = fetchNotionUsers();
-  // if (problem) createNotionPage(problem);
+  const users = await fetchNotionUsers();
+  if (problem && users) createNotionPage(problem, users);
 };
 
 main();
