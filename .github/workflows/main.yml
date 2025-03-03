@@ -8,7 +8,9 @@ on:
 jobs:
   run-script:
     runs-on: ubuntu-latest
-
+    env:
+      NOTION_KEY: ${{ secrets.NOTION_KEY }}
+      NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
