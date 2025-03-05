@@ -220,14 +220,13 @@ const fetchMyGoPicture = async () => {
 };
 
 const main = async () => {
-  // const problem = await fetchDailyProblem();
-  // const users = await fetchNotionUsers();
-  // if (problem && users) {
-  //   createNotionPage(problem, users);
-  //   const { image, questionLine } = await fetchMyGoPicture();
-  //   sendNotification(problem, image, questionLine);
-  // }
-  console.log(decodeURIComponent("%E6%94%B6%E5%85%A5%E5%AF%A6%E5%9C%A8%E6%98%AF%E5%A4%AA%E5%B0%91%E4%BA%86"));
+  const problem = await fetchDailyProblem();
+  const users = await fetchNotionUsers();
+  if (problem && users) {
+    createNotionPage(problem, users);
+    const { image, questionLine } = await fetchMyGoPicture();
+    sendNotification(problem, image, questionLine);
+  }
 };
 
 main();
