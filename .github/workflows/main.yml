@@ -2,13 +2,15 @@ name: Run Node.js Script Daily
 
 on:
   schedule:
-    - cron: "0 6 * * *" # 每天早上 6:00 UTC (台灣時間 14:00)
+    - cron: '0 1 * * *'  # 台灣時間 06:00（UTC+8）
   workflow_dispatch: # 允許手動執行
 
 jobs:
   run-script:
     runs-on: ubuntu-latest
-
+    env:
+      NOTION_KEY: ${{ secrets.NOTION_KEY }}
+      NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
