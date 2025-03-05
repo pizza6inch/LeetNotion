@@ -2,11 +2,22 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios = require("axios");
 const { Client } = require("@notionhq/client");
-const parseHtmlToNotionBlocks = require("html-to-notion");
+const { Webhook, MessageBuilder } = require("discord-webhook-node");
 const path_1 = require("path");
 const dotenv_1 = require("dotenv");
 (0, dotenv_1.config)({ path: (0, path_1.resolve)(__dirname, "../.env") });
+const discordWebhook = new Webhook(process.env.DISCORD_WEBHOOK_URL);
 const notion = new Client({ auth: process.env.NOTION_KEY });
+async function sendNotification(problem, image, questionLine) {
+    const message = `${questionLine}
+  ${problem.date} - ${problem.questionLink}
+  筆記: https://www.notion.so/19d4e41b35918080be99ead031517d6e?v=19d4e41b359180539c39000c92a594ff
+  `;
+    await discordWebhook.success(message);
+    const embed = new MessageBuilder().setImage(image);
+    // .addField(message);
+    discordWebhook.send(embed);
+}
 async function createNotionPage(problem, users) {
     const usersContent = users.flatMap((user) => [
         {
@@ -144,17 +155,46 @@ const fetchDailyProblem = async () => {
         console.error("error fetching leetcode problem:", error);
     }
 };
+const fetchMyGoPicture = async () => {
+    const lines = ["來吧", "就讓", "收入實在是太少了", "幹嘛", "叫醒", "只會騙人", "不要!", "不要不要"];
+    const questionLines = [
+        "刷一下題OK吧",
+        "阿是要刷了沒",
+        "多刷題賺大錢!",
+        "ㄟㄟ",
+        "還敢睡ㄚ",
+        "說好的要一起刷題呢?",
+        "不刷題會變笨喔",
+        "刷一下題OK吧",
+    ];
+    // random選取lines
+    const randomIndex = Math.floor(Math.random() * lines.length);
+    const randomLine = lines[randomIndex];
+    console.log(encodeURIComponent(randomLine));
+    try {
+        const response = await axios.get(`https://lb-api.tomorin.cc/public-api/ave-search?keyword=${encodeURIComponent(randomLine)}`);
+        const picture = response.data.data[0];
+        console.log(picture);
+        return {
+            image: `https://lb-api.tomorin.cc/public-api/ave-frames?episode=${picture.episode}&frame_start=${picture.frame_start}&frame_end=${picture.frame_end}`,
+            questionLine: questionLines[randomIndex],
+        };
+    }
+    catch (error) {
+        console.error("error fetching my go picture:", error);
+        return {
+            image: "https://lb-api.tomorin.cc/public-api/ave-frames?episode=1&frame_start=25108&frame_end=25108",
+            questionLine: "圖片抓不到",
+        };
+    }
+};
 const main = async () => {
     const problem = await fetchDailyProblem();
-    // const text = parseHtmlToNotionBlocks.default(problem?.question);
-    // const richText = text.map((item: { paragraph: { text: string[] | undefined; rich_text: string[] | undefined } }) => {
-    //   item.paragraph.rich_text = item.paragraph.text;
-    //   item.paragraph.text = undefined;
-    //   return item;
-    // });
-    // console.log(JSON.stringify(richText));
     const users = await fetchNotionUsers();
-    if (problem && users)
-        createNotionPage(problem, users);
+    if (problem && users) {
+        // createNotionPage(problem, users);
+        const { image, questionLine } = await fetchMyGoPicture();
+        sendNotification(problem, image, questionLine);
+    }
 };
 main();
