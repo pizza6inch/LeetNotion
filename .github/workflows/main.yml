@@ -2,7 +2,7 @@ name: Run Node.js Script Daily
 
 on:
   schedule:
-    - cron: '0 22 * * *'  # 台灣時間 06:00（UTC+8）
+    - cron: '0 1 * * *'  # 台灣時間 06:00（UTC+8）
   workflow_dispatch: # 允許手動執行
 
 jobs:
