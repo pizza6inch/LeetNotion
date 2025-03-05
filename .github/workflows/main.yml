@@ -11,6 +11,7 @@ jobs:
     env:
       NOTION_KEY: ${{ secrets.NOTION_KEY }}
       NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
